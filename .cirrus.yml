@@ -34,6 +34,8 @@ task:
 
 
   sync_script:
+    - mkdir /tmp/cirrus-build/$rom_name
+    - cd rom_name
     - repo init --no-repo-verify --depth=1 -u https://github.com/CherishOS/android_manifest.git -b eleven -g default,-device,-mips,-darwin,-notdefault
     - git clone --depth=1 https://github.com/adrian-8901/.repo-local_manifest.git .repo/local_manifests
     - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j30
