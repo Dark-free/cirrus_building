@@ -26,7 +26,7 @@ task:
 task:
   name: Build
   depends_on:
-    - Test
+    - Notifiy
   timeout_in: 2h
   persistent_worker:
     labels:
