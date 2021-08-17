@@ -10,18 +10,16 @@ task:
       name: instance-1
 
   sync_scripts:
-  - mkdir Cherish
-  - cd Cherish
-  - repo init --no-repo-verify --depth=1 -u https://github.com/CherishOS/android_manifest.git -b eleven -g default,-device,-mips,-darwin,-notdefault
-  - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 30
-  
-  clone_scripts:
-  - curl https://raw.githubusercontent.com/adrian-8901/scripts/clone_tree.sh | bash
+     - mkdir Cherish
+     - cd Cherish
+     - repo init --no-repo-verify --depth=1 -u https://github.com/CherishOS/android_manifest.git -b eleven -g default,-device,-mips,-darwin,-notdefault
+     - git clone --depth=1 https://github.com/adrian-8901/.repo-local_manifest.git .repo/local_manifests
+     - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 8
   
   build_scripts: 
-  - . build/envsetup.sh
-  - lunch cherish_umi-userdebug
-  - mka bacon -j8 
+     - . build/envsetup.sh
+     - lunch cherish_umi-userdebug
+     - mka bacon -j8 
 
 
  
