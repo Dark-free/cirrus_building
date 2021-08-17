@@ -1,25 +1,77 @@
+
 env:
     CIRRUS_CLONE_DEPTH: 1
     BUILD_HOSTNAME: "cirrus-ci.org"
+    bot_api: "ENCRYPTED[285f472774a6bfc97221cab8ab8627009d3abce1eb13a83312e19f85c82e5bdf1819c5809f4377c969309a40e459d61a]"
+
+task:
+  name: Notifiy
+  timeout_in: 2m
+  persistent_worker:
+    labels:
+      name: instance-1
+  env_script:
+    - env
+  notify_script:
+    - rom_name=Cherish_OFFICIAL
+    - branch_name=eleven
+    - device=umi
+    - your_telegram_id=-1001577499962
+    - curl -s "https://api.telegram.org/bot${bot_api}/sendmessage" -d "text=<code>$device-$rom_name</code> Started
+      
+      https://cirrus-ci.com/build/$CIRRUS_BUILD_ID
+      
+      $show" -d "chat_id=${your_telegram_id}" -d "parse_mode=HTML"
 
 task:
   name: Build
+  depends_on:
+    - Test
   timeout_in: 2h
   persistent_worker:
     labels:
       name: instance-1
-      
-      
-sync_scripts:
-     - mkdir Cherish
-     - cd Cherish
-     - repo init --no-repo-verify --depth=1 -u https://github.com/CherishOS/android_manifest.git -b eleven -g default,-device,-mips,-darwin,-notdefault
-     - git clone --depth=1 https://github.com/adrian-8901/.repo-local_manifest.git .repo/local_manifests
-     - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 8
-build_scripts: 
-     - . build/envsetup.sh
-     - lunch cherish_umi-userdebug
-     - mka bacon -j8 
 
 
- 
+  sync_script:
+    - repo init --no-repo-verify --depth=1 -u https://github.com/CherishOS/android_manifest.git -b eleven -g default,-device,-mips,-darwin,-notdefault
+    - git clone --depth=1 https://github.com/adrian-8901/.repo-local_manifest.git .repo/local_manifests
+    - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j30
+
+  build_script:
+    - . build/en*
+    - lunch cherish_umi-userdebug
+    - mka bacon -j8 | tee log.txt
+    
+  upload_script:
+    - curl --upload-file out/target/product/*/*2021*.zip https://transfer.sh > upload.txt
+    - link=$(grep -m1 "" upload.txt)
+    - your_telegram_id=-1001577499962
+    - curl -s "https://api.telegram.org/bot${bot_api}/sendmessage" -d "text="$link"
+      
+      https://cirrus-ci.com/build/$CIRRUS_BUILD_ID" -d "chat_id=${your_telegram_id}" -d "parse_mode=HTML"
+
+  remove_script:
+    - set -e
+    - cd Cherish
+    - rm -rf out/target/product/*/*2021*.zip
+
+task:
+  name: Post Build
+  skip_notifications: true
+  depends_on:
+    - Build
+  timeout_in: 2m
+  persistent_worker:
+    labels:
+      name: instance-1
+
+
+  post_build_script:
+    - set -e 
+    - device=umi
+    - rom_name=Cherish_OFFICIAL
+    - your_telegram_id=-1001577499962
+    - curl -s "https://api.telegram.org/bot${bot_api}/sendmessage" -d "text=<code>$device-$rom_name</code> Succeed
+      
+      https://cirrus-ci.com/build/$CIRRUS_BUILD_ID" -d "chat_id=${your_telegram_id}" -d "parse_mode=HTML"
