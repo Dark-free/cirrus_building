@@ -8,6 +8,7 @@ task:
   persistent_worker:
     labels:
       name: instance-1
+
   sync_scripts:
   - mkdir Cherish
   - cd Cherish
